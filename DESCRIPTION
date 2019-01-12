@@ -1,0 +1,25 @@
+Package: qid
+Type: Package
+Title:  Version of "rties" to accompany "Quantifying Interpersonal Dynamics"
+Version: 0.1.0
+Author: Emily Butler
+Maintainer: Emily Butler <eabutler@u.arizona.edu>
+Description: This package is a version of the "rties" package in the state it was in 
+    when the manuscript "Quantifying Interpersonal Dynamics for Studying Socio-Emotional
+    Processes and Adverse Health Behaviors." It allows for the replication of the
+    results in that paper. Documentation is provided as pdfs in the "documentation"
+    folder
+Depends: R (>= 3.4.4)
+Imports:
+    car,
+    DataCombine,
+    deSolve,
+    ggplot2,
+    gridExtra,
+    lattice,
+    plyr,
+    scales
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
