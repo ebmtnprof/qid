@@ -15,11 +15,84 @@ save(QID_exampleData, "QID_exampleData.RData")
 QID_exampleData <- read.csv("/Users/emily/Documents/Papers/QID/CodeData/Final/QID_data_Final.csv")
 save(QID_exampleData, "QID_exampleData.RData")
 save(QID_exampleData)
-QID_exampleData <- read.csv("/Users/emily/Documents/Papers/QID/CodeData/Final/QID_data_Final.csv")
-str(QID_exampleData)
+devtools::install_github("ebmtnprof/qid")
+devtools::install_github("ebmtnprof/qid")#
 library(qid)
-devtools::use_data(QID_exampleData, qid)
-help("devtools-deprecated")
-saveRDS(QID_exampleData, file="QID_exampleData.rds")
+devtools::install_github("ebmtnprof/qid")
+library(qid)
+devtools::install_github("ebmtnprof/qid")
+library(qid)
+devtools::install_github("ebmtnprof/qid")
+library(qid)
+data1 <- QID_exampleData
+str(data1)
+histAll(data1)
+plotRaw(data1, "couple", "dial","male","time","Women","Men")
+data2 <- dataPrep(data1, "person","couple", "dial","sub","male","time", time_lag=5)
+inert <- indivInert(data2, "Women", "Men", "Dial")
+summary(inert$R2)
+coord <- indivCoord(data2, "Women", "Men", "Dial")
+summary(coord$R2)
+inertCoord <- indivInertCoord(data2, "Women", "Men", "Dial")
+summary(inertCoord$R2)
+paramData <- inertCoord$paramData
+summary(paramData)
+histAll(paramData)
+output <- inertCoordSysVarOut(paramData, "dyad", "Women", "Men", "Sub")
+output$R2
+summary(output$models$coord)
+sysVarIn <- inertCoordSysVarIn(paramData, "dyad", "Women", "Men")
+sysVarIn$R2
+summary(sysVarIn$models$sysVarIn)
+coVar <- "reltime"
+data2 <- dataPrep(data1, "person","couple", "dial","sub","male","time", time_lag=5, coVar= coVar)
+inertCoord <- indivInertCoord(data2, "Women", "Men", "Dial", coVar=coVar)
+paramData <- inertCoord$paramData
+sysVarOut <- inertCoordSysVarOut(paramData, "dyad", "Women", "Men", "Sub", coVar=coVar)
+sysVarOut$R2
+summary(sysVarOut$models$inertCoordCovar)
+devtools::install_github("ebmtnprof/qid")
+library(qid)
+data1 <- QID_exampleData
+cor(data1)
+round(cor(data1), 2)
+round(cor(data1), 2 use="c")
+?cor
+round(cor(data1), 2 use="pairwise.complete.obs")
+?cor
+round(cor(data1, use="pairwise.complete.obs"), 2)
+setwd("/Users/emily/Documents/Projects/LAF/Data/Edited")
+d1 <- read.csv("dialC2secMods03.csv")
+d2 <- subset(d1, select=c(Couple, Person, time, Dial, male, reltime:genstressC))
+d3 <- read.csv("forBailey.csv")
+d4 <- subset(d3, select=-c(ambiv:t2genstress, sexf, dyad))
+d5 <- join(d2, d4)
+library(plyr)
+d5 <- join(d2, d4)
+round(cor(d5, use="pairwise.complete.obs"),2)
+d6 <- subset(d5, select=c(Couple, Person, time, Dial, male, relstressA, relstressC, ssfU))
+d6 <- subset(d5, select=c(Couple, Person, time, Dial, male, relstressA, relstressC, ssfU))
+d6$relStress <- d6$relstressA + d6$relstressC
+round(cor(d6, use="pairwise.complete.obs"),2)
+d6 <- subset(d5, select=c(Couple, Person, time, Dial, male, relstressA, genstressA, ssfU))
+d6$stress <- d6$relstressA + d6$genstressA
+round(cor(d6, use="pairwise.complete.obs"),2)
+d7 <- subset(d6, select=-c("relstressA","genstressA"))
+d6 <- subset(d5, select=c(Couple, Person, time, Dial, male, relstressA, genstressA, ssfU))
+d6$stress <- d6$relstressA + d6$genstressA # cor = .52
+names(d6)
+d7 <- subset(d6, select=-c("relstressA","genstressA"))
+d7 <- subset(d6, select=-c(relstressA, genstressA))
+names(d7)
+names(d7) <- c("couple","person","time","dial","male","sub","stress")
+dyads <- 19#
+d8 <- removeDyads(d7, dyads, d7$couple)
+length(unique(d8$couple)) # 79 dyads
+d9 <- subset(d8, !is.na(sub)) # remove dyads with missing sub
+length(unique(d9$couple)) # 74 dyads is final sample
+names(d9)
+setwd("/Users/emily/Documents/Papers/QID/CodeData")#
+write.csv(d9, "QID_data_Final.csv", row.names=F)
+QID_exampleData <- read.csv("/Users/emily/Documents/Papers/QID/CodeData/Final/QID_data_Final.csv")#
 setwd("/Users/emily/Documents/Papers/QID/qid/data")
-saveRDS(QID_exampleData, file="QID_exampleData.rds")
+save(QID_exampleData, file="QID_exampleData.RData")
