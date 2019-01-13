@@ -4,10 +4,11 @@
 \alias{cloSysVarOut}
 \title{Compares a base line "intercept only" model to coupled and uncoupled oscillator models for predicting the system variable from the dynamic parameters.}
 \usage{
-cloSysVarOut(basedata, sysVarType, dist0name, dist1name, sysVarName)
+cloSysVarOut(basedata, sysVarType, dist0name, dist1name, sysVarName,
+  coVar = FALSE)
 }
 \arguments{
-\item{basedata}{A dataframe containing the coupled oscillator parameter estimates produced by the "indivCloCouple" function.}
+\item{basedata}{A dataframe produced by the "indivCloCouple" function.}
 
 \item{sysVarType}{Whether the system variable is "dyad", which means both partners have the same socre, or "indiv" which means the partners can have different scores}
 

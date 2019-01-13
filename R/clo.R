@@ -90,7 +90,7 @@ gllaEmbed <- function(x, embed, tau, groupby=NA, label="x", idColumn=F) {
 #' @return The function returns a list including: 1) "data" which is a dataframe containing first and second derivative estimates of an observed state variable, and 2) "fitTable" which shows the maximal R^2 achieved for each person for an individual oscillator model, along with the associated tau, embed and estimated period of oscillation.
 
 #' @export
-estDerivs <- function(basedata, taus, embeds, delta)
+estDerivs <- function(basedata, taus, embeds, delta, coVar=FALSE)
 {
    basedata <- basedata[complete.cases(basedata), ] 
    params <- expand.grid(taus=taus, embeds=embeds)
@@ -154,10 +154,19 @@ estDerivs <- function(basedata, taus, embeds, delta)
 	   dist0 <- rep(unique(datai$dist0), idLength)
 	   dist1 <- rep(unique(datai$dist1), idLength)
 	   sysVar <- rep(unique(datai$sysVar), idLength)
-	   deriv <- cbind(dyad, id, time, obsDeriv, p_obsDeriv, dist0, dist1, sysVar)
-	   dimnames(deriv) <- list(NULL,c("dyad","id","time","obs_deTrend","d1","d2","p_obs_deTrend","p_d1","p_d2","dist0", 
-	   "dist1", "sysVar"))
+	   
+	   if(coVar==T){    
+	     covariate <- rep(unique(datai$coVar), idLength)
+	     deriv <- cbind(dyad, id, time, obsDeriv, p_obsDeriv, dist0, dist1, sysVar, covariate)
+	     dimnames(deriv) <- list(NULL,c("dyad","id","time","obs_deTrend","d1","d2","p_obs_deTrend","p_d1","p_d2","dist0", 
+	   "dist1", "sysVar", "covariate"))
 	   deriv <- as.data.frame(deriv)
+	     } else {
+	   		 deriv <- cbind(dyad, id, time, obsDeriv, p_obsDeriv, dist0, dist1, sysVar)
+	        dimnames(deriv) <- list(NULL,c("dyad","id","time","obs_deTrend","d1","d2","p_obs_deTrend","p_d1","p_d2","dist0", 
+	   "dist1", "sysVar"))
+	       deriv <- as.data.frame(deriv)
+	   }
 
 	   derivData[[p]] <- deriv
 	   fitTable[[p]] <- c("id"= unique(deriv$id), "tau"=tau, "embed"= embed, 
@@ -188,7 +197,7 @@ estDerivs <- function(basedata, taus, embeds, delta)
 
 #' @import ggplot2
 #' @export
-indivCloCouple <- function(basedata, idConvention, dist0name, dist1name, obsName)
+indivCloCouple <- function(basedata, idConvention, dist0name, dist1name, obsName, coVar=FALSE)
 {
 	newDiD <- unique(factor(basedata$dyad))
 	basedata <- basedata[complete.cases(basedata), ]
@@ -254,10 +263,17 @@ indivCloCouple <- function(basedata, idConvention, dist0name, dist1name, obsName
 	
 		param <- as.data.frame(do.call(rbind, param))
 		colnames(param) <- c("obs_0","d1_0","p_obs_0","p_d1_0","obs_1","d1_1","p_obs_1","p_d1_1","dyad")
-		temp <- subset(basedata, select=c("id","dyad","sysVar","dist0"))
-		temp2 <- unique(temp)
-		paramData <- suppressMessages(plyr::join(param, temp2))
 		
+		if(coVar==T){
+		temp <- subset(basedata, select=c("id","dyad","sysVar","dist0", "covariate"))
+		temp2 <- unique(temp)
+		} else {
+			temp <- subset(basedata, select=c("id","dyad","sysVar","dist0"))
+		    temp2 <- unique(temp)
+		}
+		
+		paramData <- suppressMessages(plyr::join(param, temp2))
+
 		cloPlots <- gridExtra::marrangeGrob(grobs= plots, ncol=2, nrow=3)
 		ggsave('cloPlotsCouple.pdf', cloPlots)
 
@@ -419,7 +435,7 @@ cloIndivCompare <- function(basedata)
 #' The dynamic parameters used in these models come from the set of clo parameter: obs_0, obs_1, d1_0, d1_1, p_obs_0, p_obs_1, p_d1_0, p_d1_1. The 3 models compared are the baseline intercept-only, the uncoupled CLO (obs_0, obs_1, d1_0, d1_1), and the full coupled CLO. The system variable can be either dyadic (sysVarType = "dyad"), where both partners have the same score (e.g., relationship length) or individual (sysVarType = "indiv"), where the partners can have different scores (e.g., age). To make it easier to read the output, the dynamic parameters are renamed as follows: obs = freq, d1 = damp, p_obs = freqCoupling, p_d1 = dampCoupling.
 
 #' 
-#' @param basedata A dataframe containing the coupled oscillator parameter estimates produced by the "indivCloCouple" function.
+#' @param basedata A dataframe produced by the "indivCloCouple" function.
 #' @param sysVarType Whether the system variable is "dyad", which means both partners have the same socre, or "indiv" which means the partners can have different scores
 #' @param dist0name A name for the level-0 of the distinguishing variable (e.g., "Women").
 #' @param dist1name A name for the level-1 of the distinguishing variable (e.g., "Men").
@@ -428,9 +444,9 @@ cloIndivCompare <- function(basedata)
 #' @return The function returns a list including: 1) the lm or lme objects containing the full results for each model(called "models"), and 2) adjusted R^2 information for each model  (called "R2"). The function also displays histograms of the residuals and plots of the predicted values against observed values for each model. 
 
 #' @export
-cloSysVarOut <- function(basedata, sysVarType, dist0name, dist1name, sysVarName)
+cloSysVarOut <- function(basedata, sysVarType, dist0name, dist1name, sysVarName, coVar=FALSE)
 {
-	basedata$dist1 <- ifelse(basedata$dist0 == 1, 0, 1)
+    basedata$dist1 <- ifelse(basedata$dist0 == 1, 0, 1)
 	
 	# Names for model parameters
 	freq0name <- paste("freq",dist0name, sep="_")
@@ -469,6 +485,12 @@ cloSysVarOut <- function(basedata, sysVarType, dist0name, dist1name, sysVarName)
 	baseR2 <- summary(base)$adj.r.squared # will be zero
 	uncoupledR2 <- summary(uncoupled)$adj.r.squared 
 	coupledR2 <- summary(coupled)$adj.r.squared
+	
+	  if(coVar==T){
+		coupledCovar <- lm(sysVar ~ covariate + obs_0 + d1_0 + obs_1 + d1_1 + p_obs_0 + p_d1_0 + p_obs_1 + p_d1_1, data= basedata)
+	names(coupledCovar$coefficients) <- c("intercept", "covariate", freq0name, damp0name, freq1name, damp1name, freqCouple0name, dampCouple0name, freqCouple1name, dampCouple1name)
+	  coupledCovarR2 <- summary(coupledCovar)$adj.r.squared
+	  }
 	}
 	
 	else if (sysVarType == "indiv")
@@ -491,6 +513,13 @@ cloSysVarOut <- function(basedata, sysVarType, dist0name, dist1name, sysVarName)
 	baseR2 <- summary(lm(obs ~ basePred))$adj.r.squared
 	uncoupledR2 <- summary(lm(obs ~ uncoupledPred))$adj.r.squared
 	coupledR2 <- summary(lm(obs ~ coupledPred))$adj.r.squared
+	
+	  if(coVar==T){
+		coupledCovar <- nlme::lme(sysVar ~ covariate + dist0:obs_0 + dist0:d1_0 + dist1:obs_1 + dist1:d1_1 + dist0:obs_1 + dist0:d1_1 + dist1:obs_0 + dist1:d1_0, random= ~ 1 | dyad, data= basedata, na.action=na.omit, method="ML", control=nlme::lmeControl(opt="optim"))
+	names(coupled$coefficients$fixed) <- c("intercept", "covariate", freq0name, damp0name, freq1name, damp1name, freqCouple0name, dampCouple0name, freqCouple1name, dampCouple1name)
+	  coupledCovarPred <- predict(coupledCovar)
+	  coupledCovarR2 <- summary(lm(obs ~ coupledCovarPred))$adj.r.squared
+	  }	
 	}
 	
 	
@@ -512,10 +541,14 @@ cloSysVarOut <- function(basedata, sysVarType, dist0name, dist1name, sysVarName)
 	hist(residuals(coupled))
 	plot(basedata$sysVar ~ coupledPred, xlim=c(min, max), ylim=c(min, max), ylab=ylabName, xlab=xlabName, main="Coupled Oscillator")
 	
-
-	models <- list(base=base, uncoupled=uncoupled, coupled=coupled)
-	R2 <- list(baseR2=baseR2, uncoupledR2=uncoupledR2, coupledR2=coupledR2)
-		
+    if(coVar==T){
+	  models <- list(base=base, uncoupled=uncoupled, coupled=coupled, coupledCovar=coupledCovar)
+	  R2 <- list(baseR2=baseR2, uncoupledR2=uncoupledR2, coupledR2=coupledR2, coupledCovarR2=coupledCovarR2)
+	  } else {
+	  	models <- list(base=base, uncoupled=uncoupled, coupled=coupled)
+	    R2 <- list(baseR2=baseR2, uncoupledR2=uncoupledR2, coupledR2=coupledR2)
+	    }
+	
 	output <- list(models=models, R2=R2)
 }
 

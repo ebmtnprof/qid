@@ -4,7 +4,8 @@
 \alias{indivCloCouple}
 \title{Estimates a "coupled oscillator" model for each dyad.}
 \usage{
-indivCloCouple(basedata, idConvention, dist0name, dist1name, obsName)
+indivCloCouple(basedata, idConvention, dist0name, dist1name, obsName,
+  coVar = FALSE)
 }
 \arguments{
 \item{basedata}{A dataframe that was produced with the "estDerivs" function.}

@@ -5,7 +5,7 @@
 \title{Compares variants of the inertia-coordination model for predicting the system variable from the dynamic parameters.}
 \usage{
 inertCoordSysVarOut(basedata, sysVarType, dist0name, dist1name, sysVarName,
-  coVar = NULL)
+  coVar = FALSE)
 }
 \arguments{
 \item{basedata}{A dataframe containing the inertia-coordination parameter estimates produced by the "indivInertCoord" function.}
@@ -17,6 +17,8 @@ inertCoordSysVarOut(basedata, sysVarType, dist0name, dist1name, sysVarName,
 \item{dist1name}{A name for the level-1 of the distinguishing variable (e.g., "Men").}
 
 \item{sysVarName}{A name for the system variable being predicted (e.g., "Satisfaction").}
+
+\item{coVar}{}
 }
 \value{
 The function returns a list including: 1) the lm or lme objects containing the full results for each model (called "models"), and 2) adjusted R^2 information for each model (called "R2"). The function also displays histograms of the residuals and plots of the predicted values against observed values for each model.

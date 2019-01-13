@@ -237,11 +237,12 @@ inertCoordIndivCompare <- function(basedata)
 #' @param dist0name A name for the level-0 of the distinguishing variable (e.g., "Women").
 #' @param dist1name A name for the level-1 of the distinguishing variable (e.g., "Men").
 #' @param sysVarName A name for the system variable being predicted (e.g., "Satisfaction").
+#' @param coVar 
 #' 
 #' @return The function returns a list including: 1) the lm or lme objects containing the full results for each model (called "models"), and 2) adjusted R^2 information for each model (called "R2"). The function also displays histograms of the residuals and plots of the predicted values against observed values for each model. 
 
 #' @export
-inertCoordSysVarOut <- function(basedata, sysVarType, dist0name, dist1name, sysVarName, coVar=NULL)
+inertCoordSysVarOut <- function(basedata, sysVarType, dist0name, dist1name, sysVarName, coVar=FALSE)
 {
 	basedata$dist1 <- ifelse(basedata$dist0 == 1, 0, 1)
 
@@ -287,7 +288,7 @@ inertCoordSysVarOut <- function(basedata, sysVarType, dist0name, dist1name, sysV
 	names(inertCoord$coefficients) <- c("intercept", inert0name, inert1name, coord0name, coord1name)
 	
 	# InertCoord dyadic sysVar with covariate
-	  if(!is.null(coVar)){
+	  if(coVar==T){
 	    inertCoordCovar <- lm(sysVar ~ coVar + inert0 + inert1 + coord0 + coord1, data= basedata)
 	    names(inertCoordCovar$coefficients) <- c("intercept", "covariate", inert0name, inert1name,   coord0name, coord1name)
       }
@@ -296,7 +297,7 @@ inertCoordSysVarOut <- function(basedata, sysVarType, dist0name, dist1name, sysV
 	inertPred <- predict(inert)
 	coordPred <- predict(coord)
 	inertCoordPred <- predict(inertCoord)
-	  if(!is.null(coVar)){
+	  if(coVar==T){
       inertCoordCovarPred <- predict(inertCoordCovar)
       }
 	
@@ -305,7 +306,7 @@ inertCoordSysVarOut <- function(basedata, sysVarType, dist0name, dist1name, sysV
 	coordR2 <- summary(coord)$adj.r.squared
 	inertCoordR2 <- summary(inertCoord)$adj.r.squared
 	
-	  if(!is.null(coVar)){
+	  if(coVar==T){
       inertCoordCovarR2 <- summary(inertCoordCovar)$adj.r.squared
       }	
 	}
@@ -328,7 +329,7 @@ inertCoordSysVarOut <- function(basedata, sysVarType, dist0name, dist1name, sysV
 	inertCoord <- nlme::lme(sysVar ~ dist0:inert0 + dist0:inert1 + dist1:inert1 + dist1:inert0 + dist0:coord0 + dist0:coord1 + dist1:coord1 + dist1:coord0, random= ~ 1 | dyad, data= basedata, na.action=na.omit, method="ML", control=nlme::lmeControl(opt="optim"))
 	names(inertCoord$coefficients$fixed) <- c("intercept", aInert0name, pInert0name, aInert1name, pInert1name, aCoord0name, pCoord0name, aCoord1name, pCoord1name)
 	
-	if(!is.null(coVar)){
+	if(coVar==T){
 	  inertCoordCovar <- nlme::lme(sysVar ~ coVar + dist0:inert0 + dist0:inert1 + dist1:inert1 + dist1:inert0 + dist0:coord0 + dist0:coord1 + dist1:coord1 + dist1:coord0, random= ~ 1 | dyad, data= basedata, na.action=na.omit, method="ML", control=nlme::lmeControl(opt="optim"))
 	names(inertCoord$coefficients$fixed) <- c("intercept", "covariate", aInert0name, pInert0name, aInert1name, pInert1name, aCoord0name, pCoord0name, aCoord1name, pCoord1name)
    }
@@ -337,7 +338,7 @@ inertCoordSysVarOut <- function(basedata, sysVarType, dist0name, dist1name, sysV
 	inertPred <- predict(inert)
 	coordPred <- predict(coord)
 	inertCoordPred <- predict(inertCoord)
-	if(!is.null(coVar)){
+	if(coVar==T){
 	  inertCoordCovarPred <- predict(inertCoordCovar)
 	}
 	
@@ -346,11 +347,10 @@ inertCoordSysVarOut <- function(basedata, sysVarType, dist0name, dist1name, sysV
 	inertR2 <- summary(lm(obs ~ inertPred))$adj.r.squared
 	coordR2 <- summary(lm(obs ~ coordPred))$adj.r.squared
 	inertCoordR2 <- summary(lm(obs ~ inertCoordPred))$adj.r.squared
-	if(!is.null(coVar)){
+	if(coVar==T){
 	  inertCoordCovarR2 <- summary(lm(obs ~ inertCoordCovarPred))$adj.r.squared
-	}
-	
-	}
+	}	
+}
 
 ############### Plotting		
 
@@ -377,7 +377,7 @@ inertCoordSysVarOut <- function(basedata, sysVarType, dist0name, dist1name, sysV
 	plot(basedata$sysVar ~ inertCoordPred, xlim=c(min, max), ylim=c(min, max), ylab=ylabName, xlab=xlabName, main="Inertia-Coordination Model")
 	
 ################ Collect results	
-	if(!is.null(coVar)){
+	if(coVar==T){
 	models <- list(base=base, inert=inert, coord=coord, inertCoord=inertCoord, inertCoordCovar=inertCoordCovar)
 	R2 <- list(baseR2=baseR2, inertR2=inertR2, coordR2=coordR2, inertCoordR2=inertCoordR2, inertCoordCovarR2=inertCoordCovarR2)
 	} else {

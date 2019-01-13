@@ -4,7 +4,7 @@
 \alias{estDerivs}
 \title{Estimates first and second derivatives of an oberved state variable}
 \usage{
-estDerivs(basedata, taus, embeds, delta)
+estDerivs(basedata, taus, embeds, delta, coVar = FALSE)
 }
 \arguments{
 \item{basedata}{A dataframe that was produced with the "dataPrep" function.}
