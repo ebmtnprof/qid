@@ -4,7 +4,7 @@
 \name{QID_exampleData}
 \alias{QID_exampleData}
 \title{Data for reproducing results reported in "Quantifying Interpersonal Dynamics".}
-\format{An object of class \code{data.frame} with 73416 rows and 15 columns.}
+\format{An object of class \code{data.frame} with 73416 rows and 7 columns.}
 \usage{
 data(QID_ExampleData)
 }
